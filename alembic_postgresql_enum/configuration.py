@@ -10,6 +10,7 @@ class Config:
     detect_enum_values_changes: bool = True
     force_dialect_support: bool = False
     ignore_enum_values_order: bool = False
+    use_alter_type_for_appends: bool = True
 
 
 _config = Config()
