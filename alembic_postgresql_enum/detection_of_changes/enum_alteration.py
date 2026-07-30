@@ -9,6 +9,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from alembic.operations.ops import UpgradeOps
+from alembic.util import CommandError
 
 from alembic_postgresql_enum.get_enum_data import (
     EnumNamesToValues,
@@ -50,6 +51,15 @@ def sync_changed_enums(
         if are_values_equal:
             # Enum definition and declaration are in sync
             continue
+
+        if (
+            configuration.reject_reordering
+            and set(old_values) <= set(new_values)
+            and new_values[: len(old_values)] != old_values
+        ):
+            raise CommandError(
+                f"Enum '{enum_name}' reorders values, this forces table rewrites and is potentially dangerous. Only append new values."
+            )
 
         log.info(
             "Detected changed enum values in %r\nWas: %r\nBecome: %r",
